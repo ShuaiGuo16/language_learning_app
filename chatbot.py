@@ -261,3 +261,36 @@ class DualChatbot:
 
         # Prepare conversation
         self._reset_conversation_history()
+
+
+
+    def step(self):
+        """Make one exchange round between two chatbots. 
+
+        Outputs:
+        --------
+        output1: response of the first chatbot
+        output2: response of the second chatbot
+        translate1: translate of the first response
+        translate2: translate of the second response
+        """        
+        
+        # Chatbot1 speaks
+        output1 = self.chatbots['role1']['chatbot'].conversation.predict(input=self.input1)
+        self.conversation_history.append({"bot": self.chatbots['role1']['name'], "text": output1})
+            
+        # Pass output of chatbot1 as input to chatbot2
+        self.input2 = output1
+        
+        # Chatbot2 speaks
+        output2 = self.chatbots['role2']['chatbot'].conversation.predict(input=self.input2)
+        self.conversation_history.append({"bot": self.chatbots['role2']['name'], "text": output2})
+        
+        # Pass output of chatbot2 as input to chatbot1
+        self.input1 = output2
+
+        # Translate responses
+        translate1 = self.translate(output1)
+        translate2 = self.translate(output2)
+
+        return output1, output2, translate1, translate2
