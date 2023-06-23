@@ -85,3 +85,53 @@ if 'translate_flag' not in st.session_state:
 
 if 'audio_flag' not in st.session_state:
     st.session_state["audio_flag"] = False
+
+
+def show_messages(mesg1_list, mesg2_list, container,
+                  time_delay, batch=False, audio=False,
+                  translation=False):
+    """Display conversation exchanges. This helper function supports
+    displaying original texts, translated texts, and audio speech. Only
+    call this helper function when all the conversation exchange has been
+    generated and recorded in the session states.
+
+    Args:
+    --------
+    mesg1_list: list of messages spoken by the first bot
+    mesg2_list: list of messages spoken by the second bot
+    container: placeholder for display conversations
+    time_delay: time interval between conversations
+    batch: True/False to indicate if conversations will be shown
+           all together or with a certain time delay.
+    audio: True/False to indicate if the audio speech need to
+           be appended to the texts  
+    translation: True/False to indicate if the translated texts need to
+                 be displayed     
+    """    
+
+    with container:
+        for mesg_1, mesg_2 in zip(mesg1_list, mesg2_list):
+            for i, mesg in enumerate([mesg_1, mesg_2]):
+                # Show original exchange ()
+                message(f"{mesg['content']}", is_user=i==1, avatar_style="bottts", 
+                        seed=AVATAR_SEED[i],
+                        key=f"message_{i}_{mesg['role']}_{mesg['content']}")
+                
+                # Mimic time interval between conversations
+                # (this time delay only appears when generating 
+                # the conversation script for the first time)
+                if not batch:
+                    time.sleep(time_delay)
+
+                # Show translated exchange
+                if translation:
+                    message(f"{mesg['translation']}", is_user=i==1, avatar_style="bottts", 
+                            seed=AVATAR_SEED[i], 
+                            key=f"message_{i}_{mesg['role']}_{mesg['translation']}")
+
+                # Append autio to the exchange
+                if audio:
+                    tts = gTTS(text=mesg['content'], lang=AUDIO_SPEECH[language])  
+                    sound_file = BytesIO()
+                    tts.write_to_fp(sound_file)
+                    st.audio(sound_file)
