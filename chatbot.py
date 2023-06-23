@@ -189,3 +189,75 @@ class Chatbot:
             prompt += f"Wait for the {self.oppo_role['name']}'s statement."
         
         return prompt
+    
+
+
+
+class DualChatbot:
+    """Class definition for dual-chatbots interaction system, created with LangChain."""
+
+    
+    def __init__(self, engine, role_dict, language, scenario, proficiency_level, 
+                 learning_mode, session_length):
+        """Parameters:
+        --------------
+        
+        engine: the backbone llm-based chat model.
+                "OpenAI" stands for OpenAI chat model;
+                Other chat models are also possible in LangChain, 
+                see https://python.langchain.com/en/latest/modules/models/chat/integrations.html
+        role_dict: dictionary to hold information regarding roles. 
+                   For conversation mode, an example role_dict is:
+                    role_dict = {
+                        'role1': {'name': 'Customer', 'action': 'ordering food'},
+                        'role2': {'name': 'Waitstaff', 'action': 'taking the order'}
+                    }
+                   For debate mode, an example role_dict is:
+                    role_dict = {
+                        'role1': {'name': 'Proponent'},
+                        'role2': {'name': 'Opponent'}
+                    }        
+        language: the language the conversation/debate will be conducted. This is 
+                  the target language the user is trying to learn.
+        scenario: for conversation, scenario represents the place where the conversation 
+                  is happening; for debate, scenario represents the debating topic.
+        proficiency_level: assumed user's proficiency level in target language. This 
+                           provides the guideline for the chatbots in terms of the 
+                           language complexity they will use. Three levels are possible:
+                           "Beginner", "Intermediate", and "Advanced".
+        session_length: the number of exchanges between two chatbots. Two levels are possible:
+                        "Short" or "Long".
+        learning_mode: two modes are possible for language learning purposes:
+                       "Conversation" --> where two bots are chatting in a specified scenario;
+                       "Debate" --> where two bots are debating on a specified topic.
+        """
+
+        # Instantiate two chatbots
+        self.engine = engine
+        self.proficiency_level = proficiency_level
+        self.language = language
+        self.chatbots = role_dict
+        for k in role_dict.keys():
+            self.chatbots[k].update({'chatbot': Chatbot(engine)})
+        
+        # Assigning roles for two chatbots
+        self.chatbots['role1']['chatbot'].instruct(role=self.chatbots['role1'], 
+                                                   oppo_role=self.chatbots['role2'], 
+                                                   language=language, scenario=scenario, 
+                                                   session_length=session_length, 
+                                                   proficiency_level=proficiency_level, 
+                                                   learning_mode=learning_mode, starter=True)
+        
+        self.chatbots['role2']['chatbot'].instruct(role=self.chatbots['role2'], 
+                                                   oppo_role=self.chatbots['role1'], 
+                                                   language=language, scenario=scenario, 
+                                                   session_length=session_length, 
+                                                   proficiency_level=proficiency_level, 
+                                                   learning_mode=learning_mode, starter=False) 
+
+        
+        # Add session length
+        self.session_length = session_length
+
+        # Prepare conversation
+        self._reset_conversation_history()
