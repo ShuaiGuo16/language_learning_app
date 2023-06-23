@@ -135,3 +135,37 @@ def show_messages(mesg1_list, mesg2_list, container,
                     sound_file = BytesIO()
                     tts.write_to_fp(sound_file)
                     st.audio(sound_file)
+
+
+# Define the button layout at the beginning
+translate_col, original_col, audio_col = st.columns(3)
+
+# Create the conversation container
+conversation_container = st.container()
+
+if 'dual_chatbots' not in st.session_state:
+
+    if st.sidebar.button('Generate'):
+
+        with conversation_container:
+            if learning_mode == 'Conversation':
+                st.write(f"""#### The following conversation happens between 
+                                {role1} and {role2} {scenario} 🎭""")
+
+            else:
+                st.write(f"""#### Debate 💬: {scenario}""")
+
+            # Instantiate dual-chatbot system
+            dual_chatbots = DualChatbot(engine, role_dict, language, scenario, 
+                                        proficiency_level, learning_mode, session_length)
+            st.session_state['dual_chatbots'] = dual_chatbots
+            
+            # Start exchanges
+            for _ in range(MAX_EXCHANGE_COUNTS[session_length][learning_mode]):
+                output1, output2, translate1, translate2 = dual_chatbots.step()
+
+                # Update session state
+                st.session_state.bot1_mesg.append({"role": dual_chatbots.chatbots['role1']['name'], 
+                                                "content": output1, "translation": translate1})
+                st.session_state.bot2_mesg.append({"role": dual_chatbots.chatbots['role2']['name'], 
+                                                "content": output2, "translation": translate2})
