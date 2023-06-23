@@ -294,3 +294,54 @@ class DualChatbot:
         translate2 = self.translate(output2)
 
         return output1, output2, translate1, translate2
+    
+
+
+    def translate(self, message):
+        """Translate the generated script into target language. 
+
+        Args:
+        --------
+        message: input message that needs to be translated.
+
+        
+        Outputs:
+        --------
+        translation: translated message.
+        """        
+
+        if self.language == 'English':
+            # No translation performed
+            translation = 'Translation: ' + message
+
+        else:
+            # Instantiate translator
+            if self.engine == 'OpenAI':
+                # Reminder: need to set up openAI API key 
+                # (e.g., via environment variable OPENAI_API_KEY)
+                self.translator = ChatOpenAI(
+                    model_name="gpt-3.5-turbo",
+                    temperature=0.7
+                )
+
+            else:
+                raise KeyError("Currently unsupported translation model type!")
+            
+            # Specify instruction
+            instruction = """Translate the following sentence from {src_lang} 
+            (source language) to {trg_lang} (target language).
+            Here is the sentence in source language: \n
+            {src_input}."""
+
+            prompt = PromptTemplate(
+                input_variables=["src_lang", "trg_lang", "src_input"],
+                template=instruction,
+            )
+
+            # Create a language chain
+            translator_chain = LLMChain(llm=self.translator, prompt=prompt)
+            translation = translator_chain.predict(src_lang=self.language,
+                                                trg_lang="English",
+                                                src_input=message)
+
+        return translation
