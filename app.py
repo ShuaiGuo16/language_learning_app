@@ -201,3 +201,22 @@ if 'dual_chatbots' in st.session_state:
                   batch=st.session_state['batch_flag'],
                   audio=st.session_state['audio_flag'],
                   translation=st.session_state['translate_flag'])
+    
+
+    # Create summary for key learning points
+    summary_expander = st.expander('Key Learning Points')
+    scripts = []
+    for mesg_1, mesg_2 in zip(mesg1_list, mesg2_list):
+        for i, mesg in enumerate([mesg_1, mesg_2]):
+            scripts.append(mesg['role'] + ': ' + mesg['content'])
+    
+    # Compile summary
+    if "summary" not in st.session_state:
+        summary = dual_chatbots.summary(scripts)
+        st.session_state["summary"] = summary
+    else:
+        summary = st.session_state["summary"]
+    
+    with summary_expander:
+        st.markdown(f"**Here is the learning summary:**")
+        st.write(summary)
