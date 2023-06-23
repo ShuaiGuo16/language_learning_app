@@ -169,3 +169,35 @@ if 'dual_chatbots' not in st.session_state:
                                                 "content": output1, "translation": translate1})
                 st.session_state.bot2_mesg.append({"role": dual_chatbots.chatbots['role2']['name'], 
                                                 "content": output2, "translation": translate2})
+                
+
+
+if 'dual_chatbots' in st.session_state:  
+
+    # Retrieve generated conversation & chatbots
+    mesg1_list = st.session_state.bot1_mesg
+    mesg2_list = st.session_state.bot2_mesg
+    dual_chatbots = st.session_state['dual_chatbots']
+
+    # Show translation 
+    if translate_col.button('Translate to English'):
+        st.session_state['translate_flag'] = True
+        st.session_state['batch_flag'] = True
+
+    # Show original text
+    if original_col.button('Show original'):
+        st.session_state['translate_flag'] = False
+        st.session_state['batch_flag'] = True
+
+    # Append audio
+    if audio_col.button('Play audio'):
+        st.session_state['audio_flag'] = True
+        st.session_state['batch_flag'] = True
+    
+    # Show complete message
+    show_messages(mesg1_list, mesg2_list, 
+                  container=conversation_container,
+                  time_delay=time_delay,
+                  batch=st.session_state['batch_flag'],
+                  audio=st.session_state['audio_flag'],
+                  translation=st.session_state['translate_flag'])
