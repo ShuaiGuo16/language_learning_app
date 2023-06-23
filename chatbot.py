@@ -345,3 +345,59 @@ class DualChatbot:
                                                 src_input=message)
 
         return translation
+    
+
+
+    def summary(self, script):
+        """Distill key language learning points from the generated scripts. 
+
+        Args:
+        --------
+        script: the generated conversation between two bots.
+
+        
+        Outputs:
+        --------
+        summary: summary of the key learning points.
+        """  
+
+        # Instantiate summary bot
+        if self.engine == 'OpenAI':
+            # Reminder: need to set up openAI API key 
+            # (e.g., via environment variable OPENAI_API_KEY)
+            self.summary_bot = ChatOpenAI(
+                model_name="gpt-3.5-turbo",
+                temperature=0.7
+            )
+
+        else:
+            raise KeyError("Currently unsupported summary model type!")
+        
+
+        # Specify instruction
+        instruction = """The following text is a simulated conversation in 
+        {src_lang}. The goal of this text is to aid {src_lang} learners to learn
+        real-life usage of {src_lang}. Therefore, your task is to summarize the key 
+        learning points based on the given text. Specifically, you should summarize 
+        the key vocabulary, grammar points, and function phrases that could be important 
+        for students learning {src_lang}. Your summary should be conducted in English, but
+        use examples from the text in the original language where appropriate.
+        Remember your target students have a proficiency level of 
+        {proficiency} in {src_lang}. You summarization must match with their 
+        proficiency level. 
+
+        The conversation is: \n
+        {script}."""
+
+        prompt = PromptTemplate(
+            input_variables=["src_lang", "proficiency", "script"],
+            template=instruction,
+        )
+
+        # Create a language chain
+        summary_chain = LLMChain(llm=self.summary_bot, prompt=prompt)
+        summary = summary_chain.predict(src_lang=self.language,
+                                        proficiency=self.proficiency_level,
+                                        script=script)
+        
+        return summary
