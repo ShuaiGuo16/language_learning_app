@@ -69,3 +69,19 @@ else:
 language = st.sidebar.selectbox('Target Language 🔤', LANGUAGES)
 session_length = st.sidebar.selectbox('Session Length ⏰', SESSION_LENGTHS)
 proficiency_level = st.sidebar.selectbox('Proficiency Level 🏆', PROFICIENCY_LEVELS)
+
+
+if "bot1_mesg" not in st.session_state:
+    st.session_state["bot1_mesg"] = []
+
+if "bot2_mesg" not in st.session_state:
+    st.session_state["bot2_mesg"] = []
+
+if 'batch_flag' not in st.session_state:
+    st.session_state["batch_flag"] = False
+
+if 'translate_flag' not in st.session_state:
+    st.session_state["translate_flag"] = False
+
+if 'audio_flag' not in st.session_state:
+    st.session_state["audio_flag"] = False
