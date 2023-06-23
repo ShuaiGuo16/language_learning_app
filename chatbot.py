@@ -401,3 +401,15 @@ class DualChatbot:
                                         script=script)
         
         return summary
+    
+
+
+    def _reset_conversation_history(self):
+        """Reset the conversation history.
+        """    
+        # Placeholder for conversation history
+        self.conversation_history = []
+
+        # Inputs for two chatbots
+        self.input1 = "Start the conversation."
+        self.input2 = "" 
