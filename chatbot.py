@@ -98,3 +98,94 @@ class Chatbot:
         # Create conversation chain
         self.conversation = ConversationChain(memory=self.memory, prompt=prompt, 
                                               llm=self.llm, verbose=False)
+        
+
+
+    def _specify_system_message(self):
+        """Specify the behavior of the chatbot, which consists of the following aspects:
+        - general context: conducting conversation/debate under given scenario
+        - the language spoken
+        - purpose of the simulated conversation/debate
+        - language complexity requirement
+        - exchange length requirement
+        - other nuance constraints
+
+        Outputs:
+        --------
+        prompt: instructions for the chatbot.
+        """       
+
+        # Determine the number of exchanges between two bots
+        exchange_counts_dict = {
+            'Short': {'Conversation': 8, 'Debate': 4},
+            'Long': {'Conversation': 16, 'Debate': 8}
+        }
+        exchange_counts = exchange_counts_dict[self.session_length][self.learning_mode]
+        
+        # Determine number of arguments in one debate round
+        argument_num_dict = {
+            'Beginner': 4,
+            'Intermediate': 6,
+            'Advanced': 8
+        }        
+        
+        # Determine language complexity
+        if self.proficiency_level == 'Beginner':
+            lang_requirement = """use as basic and simple vocabulary and
+            sentence structures as possible. Must avoid idioms, slang, 
+            and complex grammatical constructs."""
+        
+        elif self.proficiency_level == 'Intermediate':
+            lang_requirement = """use a wider range of vocabulary and a variety of sentence structures. 
+            You can include some idioms and colloquial expressions, 
+            but avoid highly technical language or complex literary expressions."""
+        
+        elif self.proficiency_level == 'Advanced':
+            lang_requirement = """use sophisticated vocabulary, complex sentence structures, idioms, 
+            colloquial expressions, and technical language where appropriate."""
+
+        else:
+            raise KeyError('Currently unsupported proficiency level!')
+    
+        
+        # Compile bot instructions 
+        if self.learning_mode == 'Conversation':
+            prompt = f"""You are an AI that is good at role-playing. 
+            You are simulating a typical conversation happened {self.scenario}. 
+            In this scenario, you are playing as a {self.role['name']} {self.role['action']}, speaking to a 
+            {self.oppo_role['name']} {self.oppo_role['action']}.
+            Your conversation should only be conducted in {self.language}.
+            This simulated {self.learning_mode} is designed for {self.language} language learners to learn real-life 
+            conversations in {self.language}. You should assume the learners' proficiency level in 
+            {self.language} is {self.proficiency_level}. Therefore, you should {lang_requirement}.
+            You should finish the conversation within {exchange_counts} exchanges with the {self.oppo_role['name']}. 
+            Make your conversation with {self.oppo_role['name']} natural and typical in the considered scenario in 
+            {self.language} cultural."""
+        
+        elif self.learning_mode == 'Debate':
+            prompt = f"""You are an AI that is good at debating. 
+            You are now engaged in a debate with the following topic: {self.scenario}. 
+            In this debate, you are taking on the role of a {self.role['name']}. 
+            Always remember your stances in the debate.
+            Your debate should only be conducted in {self.language}.
+            This simulated debate is designed for {self.language} language learners to 
+            learn {self.language}. You should assume the learners' proficiency level in {self.language} 
+            is {self.proficiency_level}. Therefore, you should {lang_requirement}.
+            You will exchange opinions with another AI (who plays the {self.oppo_role['name']} role) 
+            {exchange_counts} times. 
+            Everytime you speak, you can only speak no more than 
+            {argument_num_dict[self.proficiency_level]} sentences."""
+        
+        else:
+            raise KeyError('Currently unsupported learning mode!')
+        
+        # Give bot instructions
+        if self.starter:
+            # In case the current bot is the first one to speak
+            prompt += f"You are leading the {self.learning_mode}. \n"
+        
+        else:
+            # In case the current bot is the second one to speak
+            prompt += f"Wait for the {self.oppo_role['name']}'s statement."
+        
+        return prompt
