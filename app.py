@@ -86,8 +86,11 @@ if 'translate_flag' not in st.session_state:
 if 'audio_flag' not in st.session_state:
     st.session_state["audio_flag"] = False
 
+if 'message_counter' not in st.session_state:
+    st.session_state["message_counter"] = 0
 
-def show_messages(mesg1_list, mesg2_list, container,
+
+def show_messages(mesg_1, mesg_2, message_counter,
                   time_delay, batch=False, audio=False,
                   translation=False):
     """Display conversation exchanges. This helper function supports
@@ -97,44 +100,50 @@ def show_messages(mesg1_list, mesg2_list, container,
 
     Args:
     --------
-    mesg1_list: list of messages spoken by the first bot
-    mesg2_list: list of messages spoken by the second bot
-    container: placeholder for display conversations
+    mesg1: messages spoken by the first bot
+    mesg2: messages spoken by the second bot
+    message_counter: create unique ID key for chat messages
     time_delay: time interval between conversations
     batch: True/False to indicate if conversations will be shown
            all together or with a certain time delay.
     audio: True/False to indicate if the audio speech need to
            be appended to the texts  
     translation: True/False to indicate if the translated texts need to
-                 be displayed     
+                 be displayed    
+
+    Output:
+    -------
+    message_counter: updated counter for ID key
     """    
 
-    with container:
-        for mesg_1, mesg_2 in zip(mesg1_list, mesg2_list):
-            for i, mesg in enumerate([mesg_1, mesg_2]):
-                # Show original exchange ()
-                message(f"{mesg['content']}", is_user=i==1, avatar_style="bottts", 
-                        seed=AVATAR_SEED[i],
-                        key=f"message_{i}_{mesg['role']}_{mesg['content']}")
-                
-                # Mimic time interval between conversations
-                # (this time delay only appears when generating 
-                # the conversation script for the first time)
-                if not batch:
-                    time.sleep(time_delay)
+    for i, mesg in enumerate([mesg_1, mesg_2]):
+        # Show original exchange ()
+        message(f"{mesg['content']}", is_user=i==1, avatar_style="bottts", 
+                seed=AVATAR_SEED[i],
+                key=message_counter)
+        message_counter += 1
+        
+        # Mimic time interval between conversations
+        # (this time delay only appears when generating 
+        # the conversation script for the first time)
+        if not batch:
+            time.sleep(time_delay)
 
-                # Show translated exchange
-                if translation:
-                    message(f"{mesg['translation']}", is_user=i==1, avatar_style="bottts", 
-                            seed=AVATAR_SEED[i], 
-                            key=f"message_{i}_{mesg['role']}_{mesg['translation']}")
+        # Show translated exchange
+        if translation:
+            message(f"{mesg['translation']}", is_user=i==1, avatar_style="bottts", 
+                    seed=AVATAR_SEED[i], 
+                    key=message_counter)
+            message_counter += 1
 
-                # Append autio to the exchange
-                if audio:
-                    tts = gTTS(text=mesg['content'], lang=AUDIO_SPEECH[language])  
-                    sound_file = BytesIO()
-                    tts.write_to_fp(sound_file)
-                    st.audio(sound_file)
+        # Append autio to the exchange
+        if audio:
+            tts = gTTS(text=mesg['content'], lang=AUDIO_SPEECH[language])  
+            sound_file = BytesIO()
+            tts.write_to_fp(sound_file)
+            st.audio(sound_file)
+
+    return message_counter
 
 
 # Define the button layout at the beginning
@@ -146,6 +155,9 @@ conversation_container = st.container()
 if 'dual_chatbots' not in st.session_state:
 
     if st.sidebar.button('Generate'):
+
+        # Add flag to indicate if this is the first time running the script
+        st.session_state["first_time_exec"] = True 
 
         with conversation_container:
             if learning_mode == 'Conversation':
@@ -164,11 +176,20 @@ if 'dual_chatbots' not in st.session_state:
             for _ in range(MAX_EXCHANGE_COUNTS[session_length][learning_mode]):
                 output1, output2, translate1, translate2 = dual_chatbots.step()
 
+                mesg_1 = {"role": dual_chatbots.chatbots['role1']['name'], 
+                        "content": output1, "translation": translate1}
+                mesg_2 = {"role": dual_chatbots.chatbots['role2']['name'], 
+                        "content": output2, "translation": translate2}
+                
+                new_count = show_messages(mesg_1, mesg_2, 
+                                          st.session_state["message_counter"],
+                                          time_delay=time_delay, batch=False,
+                                          audio=False, translation=False)
+                st.session_state["message_counter"] = new_count
+
                 # Update session state
-                st.session_state.bot1_mesg.append({"role": dual_chatbots.chatbots['role1']['name'], 
-                                                "content": output1, "translation": translate1})
-                st.session_state.bot2_mesg.append({"role": dual_chatbots.chatbots['role2']['name'], 
-                                                "content": output2, "translation": translate2})
+                st.session_state.bot1_mesg.append(mesg_1)
+                st.session_state.bot2_mesg.append(mesg_2)
                 
 
 
