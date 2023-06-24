@@ -25,9 +25,8 @@ class Chatbot:
         """Select backbone large language model, as well as instantiate 
         the memory for creating language chain in LangChain.
         
-        Parameters:
+        Args:
         --------------
-        
         engine: the backbone llm-based chat model.
                 "OpenAI" stands for OpenAI chat model;
                 Other chat models are also possible in LangChain, 
@@ -57,9 +56,8 @@ class Chatbot:
                  learning_mode, starter=False):
         """Determine the context of chatbot interaction. 
         
-        Parameters:
-        -----------
-        
+        Args:
+        -----------    
         role: the role played by the current bot. 
         oppo_role: the role played by the opponent bot.
         language: the language the conversation/debate will be conducted. This is 
@@ -199,9 +197,8 @@ class DualChatbot:
     
     def __init__(self, engine, role_dict, language, scenario, proficiency_level, 
                  learning_mode, session_length):
-        """Parameters:
-        --------------
-        
+        """Args:
+        --------------      
         engine: the backbone llm-based chat model.
                 "OpenAI" stands for OpenAI chat model;
                 Other chat models are also possible in LangChain, 
