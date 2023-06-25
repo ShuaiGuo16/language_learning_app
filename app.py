@@ -94,9 +94,7 @@ def show_messages(mesg_1, mesg_2, message_counter,
                   time_delay, batch=False, audio=False,
                   translation=False):
     """Display conversation exchanges. This helper function supports
-    displaying original texts, translated texts, and audio speech. Only
-    call this helper function when all the conversation exchange has been
-    generated and recorded in the session states.
+    displaying original texts, translated texts, and audio speech. 
 
     Args:
     --------
