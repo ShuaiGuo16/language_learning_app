@@ -152,7 +152,7 @@ class Chatbot:
             You are simulating a typical conversation happened {self.scenario}. 
             In this scenario, you are playing as a {self.role['name']} {self.role['action']}, speaking to a 
             {self.oppo_role['name']} {self.oppo_role['action']}.
-            Your conversation should only be conducted in {self.language}.
+            Your conversation should only be conducted in {self.language}. Do not translate.
             This simulated {self.learning_mode} is designed for {self.language} language learners to learn real-life 
             conversations in {self.language}. You should assume the learners' proficiency level in 
             {self.language} is {self.proficiency_level}. Therefore, you should {lang_requirement}.
@@ -165,7 +165,7 @@ class Chatbot:
             You are now engaged in a debate with the following topic: {self.scenario}. 
             In this debate, you are taking on the role of a {self.role['name']}. 
             Always remember your stances in the debate.
-            Your debate should only be conducted in {self.language}.
+            Your debate should only be conducted in {self.language}. Do not translate.
             This simulated debate is designed for {self.language} language learners to 
             learn {self.language}. You should assume the learners' proficiency level in {self.language} 
             is {self.proficiency_level}. Therefore, you should {lang_requirement}.
